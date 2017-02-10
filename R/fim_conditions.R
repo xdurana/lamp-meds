@@ -1,16 +1,59 @@
 library(data.table)
+library(tidyr)
 library(dplyr)
 
-lamp_icd <- function(icd) {
+get_all <- function() {
   
-  file.all <- 'data/conditions/all.csv'
-  file.dat <- 'data/conditions/data.csv'
-  file.val <- 'data/conditions/values.csv'
-  file.log <- 'output/conditions/conditions-lamp.log'
-  file.out <- 'output/conditions/conditions-lamp.csv'
-  file.eut <- 'output/conditions/conditions-lamp-purged.csv'
+  directory <- '/home/labs/dnalab/share/lims/R/gcat-cleaning-data'
   
-  ds <- fread(file.all)
+  conditions <- fread(file.path(directory, 'output/conditions/icd9.csv'))
+  medication <- fread(file.path(directory, 'output/medications/atc.csv'))
+  
+  as.data.frame(table(conditions$Codi_3)) %>%
+    arrange(desc(Freq)) %>%
+    View()
+  
+  gcat <- fread(file.path(directory, 'output/data.csv'), stringsAsFactors = TRUE)
+  
+  conditions_transaction <- conditions %>%
+    transform(
+      id=entity_id,
+      value=sprintf("ICD_%s", Codi_3),
+      count=1
+    ) %>%
+    select(
+      id,
+      value,
+      count
+    ) %>%
+    unique()
+  
+  medication_transaction <- medication %>%
+    transform(
+      value=substring(sprintf("ATC_%s", value), 1, 7),
+      count = 1
+    ) %>%
+    select(
+      id,
+      value,
+      count
+    ) %>%
+    unique()
+  
+  data_wide <- conditions_transaction %>%
+    rbind(medication_transaction) %>%
+    spread(value, count, fill = 0)
+  
+  data_wide
+}
+
+lamp_icd <- function(ds, icd) {
+  
+  file.dat <- sprintf('data/conditions/data_%s.csv', icd)
+  file.val <- sprintf('data/conditions/values_%s.csv', icd)
+  file.log <- sprintf('output/conditions/lamp_%s.log', icd)
+  file.out <- sprintf('output/conditions/lamp_%s.csv', icd)
+  file.eut <- sprintf('output/conditions/lamp_%s-purged.csv', icd)
   
   ds %>%
     select(-matches(icd)) %>%
@@ -33,4 +76,9 @@ lamp_icd <- function(icd) {
     file.out,
     file.eut
   ))
+}
+
+run <- function(icd) {
+  ds <- get_all()
+  lamp_icd(icd)
 }

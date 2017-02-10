@@ -1,0 +1,66 @@
+---
+title: Discriminative pattern mining for genomic data
+subtitle:
+author: |
+  | Xavier Duran
+  | GCAT Genomes for Life
+  | Institut de Recerca Germans Trias i Pujol (IGTP)
+date: |
+  | Bioinfo Talks
+  | February 15^th^ 2017
+header-includes:
+output:
+  beamer_presentation:
+    theme: "gcat"
+    incremental: no
+    keep_tex: yes
+    fig_caption: false
+    dev: png
+    slide_level: 2
+    toc: no
+---
+
+## Biomarker Discovery as a Pattern Mining Problem
+
+- Single genetic variants, gene expression levels, protein abundancies are often not sufficiently indicative of disease outbreak, progression or therapy outcome
+- Searching for combinations of these molecular factors creates an enormous search space, and two inherent problems:
+  - Computational: How to efficiently search this large space?
+  - Statistical: How to properly account for testing an enormous number of hypotheses?
+
+## Gene Set Analysis (GSA)
+### Overrepresentation analysis
+
+Given a list of genes, are any of the pathways (Gene Ontologies) *surprisingly* enriched in that list?
+
+How? Calculating p-value with a simple hypergeometric distribution
+
+||Significant genes|Non-significant genes|Total|
+|--------------|-------|---|---|
+|SNPs in the group|k|K-k|K|
+|other genes|n-k|N-K-n+k|N-K|
+|total|n|N-n|N|
+
+$$P(X=k) = \frac{\binom{K}{k}\binom{N-K}{n-k}}{\binom{N}{n}}$$
+
+## LAMPLINK
+### Configuration
+
+|||
+|---|-------|
+|FDR|--sglev 0.05|
+|MAF|--upper 0.1|
+||--model-dom|
+
+
+## LAMPLINK
+### Results
+
+|||
+|---|-------:|
+|SNPs|6799|
+|correction factor|2501|
+|tested hypothesis|1175|
+|-|-|
+|significant combinations|24|
+|significant combinations after LD correction|8|
+|significant SNPs after LD correction|15|
