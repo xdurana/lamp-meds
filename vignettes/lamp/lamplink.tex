@@ -73,7 +73,7 @@
 \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
 
-\title{Statistically significant SNP combinations for GWAS data}
+\title{Significant pattern mining for GWAS data}
 \author{Xavier Duran\\
 GCAT Genomes for Life\\
 Institut de Recerca Germans Trias i Pujol (IGTP)}
@@ -85,54 +85,30 @@ February 15\textsuperscript{th} 2017}
 
 \begin{frame}{Missing heritability problem on GWAS}
 
-GWAS studies have discovered many loci associated with various complex
-traits but they only explain a very small part of the human heritability
-
-Screening of individual SNPs using statistical tests to assess the
-association of each SNP with a phenotype
-
-\end{frame}
-
-\begin{frame}{Statistical epistatic interactions are hard to find}
-
-This unexplained variation because GWAS tries to solve common variant,
-common disease hypothesis
-
-Most complex traits are due to the effect of interactions of different
-SNP
-
-Combinatorial effects of multiple SNPs
-
-Epistasis can be part of the explanation
-
-\end{frame}
-
-\begin{frame}{Why?}
-
-Apply data mining and machine learning techniques to biological data
-analysis
-
-Hard computational problem
-
-GCAT
+\includegraphics{lamplink_files/figure-beamer/unnamed-chunk-1-1.pdf}
 
 \end{frame}
 
 \begin{frame}{Limitless arity multi-testing procedure (LAMP)}
 
-Computational complexity
+Significant pattern mining techniques can help to find high-order
+interactions on GWAS data (and other biological data)
 
-Statistical significance
+\pause
 
-\end{frame}
-
-\begin{frame}{Outline}
+\begin{block}{Outline}
 
 The complexity of combinatorial variant discovery
 
+\pause
+
 How does LAMP approaches a solution
 
+\pause
+
 Results on a lung cancer dataset
+
+\end{block}
 
 \end{frame}
 
@@ -142,18 +118,24 @@ Results on a lung cancer dataset
 
 Exploring all combinations is computationally prohibitive
 
-Exponential growth: for \(M\) binary variables, \(2^M\) tests computed
+\pause
+
+\(M^2\) second order possible interactions
+
+\pause
+
+\(2^M\) limitless order interactions
+
+\pause
 
 \end{block}
-
-\end{frame}
-
-\begin{frame}{Finding combinations of features}
 
 \begin{block}{Statistical problem}
 
 Discovered combinations are statistically unlikely due to multiple
 testing correction
+
+\pause
 
 For \(M\) binary variables, Bonferroni correction sets significance
 below \(\frac{\alpha}{2^M}\)
@@ -164,14 +146,84 @@ below \(\frac{\alpha}{2^M}\)
 
 \begin{frame}{Finding combinations of features}
 
-\begin{block}{We cannot test all combinations}
+\begin{block}{Machine learning approaches}
 
-Most machine learning methods (RF) don't evaluate statistical
-significance of the reported results
+Random Forests, Suport Vector Machines, Multifactor Dimensionality
+Reduction
 
-Too much false positives, very costly to futher explore hypothesis
+\pause
 
-Not comprehensive
+Variable rankings
+
+\pause
+
+Too much false positives
+
+\pause
+
+Very costly to futher explore hypothesis
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Limitless arity multi-testing procedure (LAMP)}
+
+\begin{block}{Fisher's exact test}
+
+Not all combinations are frequent enough to become significant in any
+case/control setting
+
+\pause
+
+Each combination has a maximum p-value, independent of its distribution
+on the two classes
+
+\pause
+
+\begin{longtable}[]{@{}lrrr@{}}
+\toprule
+& Case & Control & Total\tabularnewline
+\midrule
+\endhead
+Has \(S_i\) & & & 13\tabularnewline
+Hasn't \(S_i\) & & & 357\tabularnewline
+total & 184 & 186 & 370\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Limitless arity multi-testing procedure (LAMP)}
+
+\begin{block}{Fisher's exact test}
+
+Not all combinations are frequent enough to become significant in any
+case/control setting
+
+Each combination has a maximum p-value, independent of its distribution
+on the two classes
+
+\begin{longtable}[]{@{}lrrr@{}}
+\toprule
+& Case & Control & Total\tabularnewline
+\midrule
+\endhead
+Has \(S_i\) & 13 & 0 & 13\tabularnewline
+Hasn't \(S_i\) & 171 & 186 & 357\tabularnewline
+total & 184 & 186 & 370\tabularnewline
+\bottomrule
+\end{longtable}
+
+\pause
+
+raw p-value = \(9.1*10^{-5}\)
+
+\pause
+
+FWER threshold \(\delta=\alpha/1000\) = 0.05/1000 = \(5*10^{-5}\)
 
 \end{block}
 
@@ -182,11 +234,7 @@ Not comprehensive
 Multiple testing procedure for listing ALL statistically significant
 high order interactions
 
-\end{frame}
-
-\begin{frame}{Limitless arity multi-testing procedure (LAMP)}
-
-\begin{block}{Testable combinations}
+\pause
 
 Upper bound of Family Wise Error Ratio (FWER)
 
@@ -194,30 +242,47 @@ Upper bound of Family Wise Error Ratio (FWER)
 
 {[}Terada et al. 2013{]}
 
-\end{block}
+\end{frame}
+
+\begin{frame}{LAMPLINK}
+
+LAMPLINK is implemented as additional features to PLINK
+
+\pause
+
+Model dominant/recessive for the risk class for the minor allele
+
+\pause
+
+\begin{itemize}
+\tightlist
+\item
+  Find all significant combinations
+\item
+  Remove combinations with SNPs in linkage desequilibrium
+\end{itemize}
 
 \end{frame}
 
-\begin{frame}{Limitless arity multi-testing procedure (LAMP)}
+\begin{frame}{LAMPLINK}
 
-\begin{block}{Fisher's exact test}
+\begin{block}{LAMP in a lung cancer dataset}
 
-Not all combinations are frequent enough to become frequent in any
-case/control setting
+GWAS data of lung cancer progression
 
-Each combination has a maximum p-value, independent of its distribution
-on the two classes
-
-Test only what is relevant to test
-
-\begin{longtable}[]{@{}llll@{}}
+\begin{longtable}[]{@{}ll@{}}
 \toprule
-& Case & Control & Total\tabularnewline
-\midrule
-\endhead
-Has \(S_i\) & 171 & 206 & 377\tabularnewline
-Hasn't \(S_i\) & 29 & 94 & 123\tabularnewline
-total & 200 & 300 & 500\tabularnewline
+GWAS threshold & p-value \textless{} \(10^{-4}\)\tabularnewline
+SNPs & 695\tabularnewline
+Individuals & 178\tabularnewline
+Statistical test & Fisher's exact test\tabularnewline
+Adjusted significance level & \(5.8*10^{-9}\)\tabularnewline
+Correction factor & 8619336\tabularnewline
+Significant combinations & 5019\tabularnewline
+\(r^2\) for LD & 0.2\tabularnewline
+Significant combinations after LD pruning & 145\tabularnewline
+Significant SNPs & 25\tabularnewline
+Maximum arity & 7\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -225,30 +290,102 @@ total & 200 & 300 & 500\tabularnewline
 
 \end{frame}
 
-\begin{frame}{Limitless arity multi-testing procedure (LAMP)}
+\begin{frame}{LAMPLINK}
 
-\begin{block}{Fisher's exact test}
+\begin{block}{LAMP in a lung cancer dataset}
 
-Not all combinations are frequent enough to become frequent in any
-case/control setting
-
-Each combination has a maximum p-value, independent of its distribution
-on the two classes
-
-Test only what is relevant to test
-
-\begin{longtable}[]{@{}llll@{}}
-\toprule
-& Case & Control & Total\tabularnewline
-\midrule
-\endhead
-Has \(S_i\) & k & K-k & K\tabularnewline
-Hasn't \(S_i\) & n-k & N-K-n+k & N-K\tabularnewline
-total & n & N-n & N\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{table}[ht]
+\centering
+\scalebox{0.3}{
+\begin{tabular}{lrrlr}
+  \hline
+COMBID & Raw\_P & Adjusted\_P & COMB & arity \\ 
+  \hline
+COMB7 & 0.00000000 & 0.00001538 & rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs4545589,rs139996291:17192744:G:A & 5 \\ 
+  COMB10 & 0.00000000 & 0.00002144 & rs2271545:16095316:C:T,rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G & 4 \\ 
+  COMB39 & 0.00000000 & 0.00004028 & rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs4545589,rs9788969,rs139996291:17192744:G:A & 6 \\ 
+  COMB42 & 0.00000000 & 0.00008586 & rs2271545:16095316:C:T,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs139996291:17192744:G:A & 4 \\ 
+  COMB47 & 0.00000000 & 0.00009664 & rs35684:10326686:A:G,rs1565656:188922545:A:G,rs4545589,rs9788969,rs139996291:17192744:G:A & 5 \\ 
+  COMB62 & 0.00000000 & 0.00011584 & rs35684:10326686:A:G,rs1565656:188922545:A:G,rs4545589,rs139996291:17192744:G:A & 4 \\ 
+  COMB85 & 0.00000000 & 0.00013264 & rs2271545:16095316:C:T,rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs139996291:17192744:G:A & 5 \\ 
+  COMB159 & 0.00000000 & 0.00025099 & rs2937667:117246037:C:A,rs10985542:124887090:G:A,12:48798429:T:C,rs139996291:17192744:G:A & 4 \\ 
+  COMB192 & 0.00000000 & 0.00050371 & rs35684:10326686:A:G,rs2937667:117246037:C:A,rs1565656:188922545:A:G,rs139996291:17192744:G:A & 4 \\ 
+  COMB274 & 0.00000000 & 0.00058472 & rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs4545589,rs9788969 & 5 \\ 
+  COMB278 & 0.00000000 & 0.00058472 & rs438228:161484124:A:C,rs35684:10326686:A:G,rs6822954:35695840:A:G,rs1565656:188922545:A:G,rs4545589 & 5 \\ 
+  COMB287 & 0.00000000 & 0.00067780 & rs1565656:188922545:A:G,rs7111257:9930813:A:G,rs4545589,rs139996291:17192744:G:A & 4 \\ 
+  COMB328 & 0.00000000 & 0.00078732 & rs2271545:16095316:C:T,rs438228:161484124:A:C,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs9788969 & 5 \\ 
+  COMB368 & 0.00000000 & 0.00078732 & rs35684:10326686:A:G,rs2937667:117246037:C:A,rs1565656:188922545:A:G,rs4545589,rs139996291:17192744:G:A & 5 \\ 
+  COMB374 & 0.00000000 & 0.00078732 & rs35684:10326686:A:G,rs2937667:117246037:C:A,rs1565656:188922545:A:G,rs71317450:27405120:A:T,rs139996291:17192744:G:A & 5 \\ 
+  COMB376 & 0.00000000 & 0.00078732 & rs35684:10326686:A:G,rs6822954:35695840:A:G,rs1565656:188922545:A:G,rs4545589 & 4 \\ 
+  COMB423 & 0.00000000 & 0.00079983 & rs2271545:16095316:C:T,rs35684:10326686:A:G,rs1565656:188922545:A:G,rs9788969,rs139996291:17192744:G:A & 5 \\ 
+  COMB425 & 0.00000000 & 0.00079983 & rs35684:10326686:A:G,rs6822954:35695840:A:G,rs11740157:10041128:A:G,12:51088287:AATACATAC:A & 4 \\ 
+  COMB447 & 0.00000000 & 0.00117950 & rs438228:161484124:A:C,rs1565656:188922545:A:G,rs4545589,rs139996291:17192744:G:A & 4 \\ 
+  COMB610 & 0.00000000 & 0.00151520 & rs2937667:117246037:C:A,rs10985542:124887090:G:A,12:48798429:T:C,rs9788969,rs139996291:17192744:G:A & 5 \\ 
+   \hline
+\end{tabular}
+}
+\caption{Statistically significant variant combinations} 
+\end{table}
 
 \end{block}
+
+\end{frame}
+
+\begin{frame}{LAMPLINK}
+
+\begin{block}{LAMP in a lung cancer dataset}
+
+\begin{table}[ht]
+\centering
+\scalebox{0.5}{
+\begin{tabular}{rllllllrrr}
+  \hline
+CHR & SNP & A1 & A2 & TEST & AFF & UNAFF & P & OR & COMB \\ 
+  \hline
+22 & rs139996291:17192744:G:A & A & G & DOM & 34/7 & 74/62 & 0.00094253 & 4.06950 & 106 \\ 
+  4 & rs1565656:188922545:A:G & G & A & DOM & 33/8 & 74/62 & 0.00327766 & 3.45608 & 92 \\ 
+  3 & rs35684:10326686:A:G & G & A & DOM & 30/11 & 56/80 & 0.00035202 & 3.89610 & 88 \\ 
+  16 & rs9788969 & C & T & DOM & 34/7 & 72/64 & 0.00051405 & 4.31746 & 56 \\ 
+  1 & rs438228:161484124:A:C & C & A & DOM & 32/9 & 77/59 & 0.01679720 & 2.72439 & 49 \\ 
+  1 & rs2271545:16095316:C:T & C & T & DOM & 32/9 & 64/72 & 0.00058287 & 4.00000 & 41 \\ 
+  11 & rs4545589 & G & A & DOM & 28/13 & 57/79 & 0.00409010 & 2.98516 & 41 \\ 
+  12 & 12:51088287:AATACATAC:A & AATACATAC & A & DOM & 33/8 & 79/57 & 0.00967982 & 2.97627 & 36 \\ 
+  3 & rs2937667:117246037:C:A & C & A & DOM & 32/9 & 77/59 & 0.01679720 & 2.72439 & 32 \\ 
+  5 & rs11740157:10041128:A:G & G & A & DOM & 27/14 & 42/94 & 0.00009612 & 4.31633 & 31 \\ 
+  4 & rs6822954:35695840:A:G & G & A & DOM & 33/8 & 68/68 & 0.00055543 & 4.12500 & 15 \\ 
+  9 & rs10985542:124887090:G:A & G & A & DOM & 26/15 & 49/87 & 0.00224055 & 3.07755 & 13 \\ 
+  12 & 12:48798429:T:C & T & C & DOM & 21/20 & 33/103 & 0.00174931 & 3.27727 & 12 \\ 
+  21 & rs71317450:27405120:A:T & T & A & DOM & 30/11 & 82/54 & 0.14438900 & 1.79601 & 9 \\ 
+  12 & 12:48792747:A:G & A & G & DOM & 21/20 & 33/103 & 0.00174931 & 3.27727 & 7 \\ 
+  5 & rs11744968:10054699:T:C & C & T & DOM & 23/18 & 36/100 & 0.00064061 & 3.54938 & 5 \\ 
+  11 & rs7111257:9930813:A:G & A & G & DOM & 29/12 & 56/80 & 0.00120037 & 3.45238 & 5 \\ 
+  16 & rs59689196:78692994:A:C & C & A & DOM & 18/23 & 27/109 & 0.00366244 & 3.15942 & 5 \\ 
+  4 & rs28657552:161256788:G:A & A & G & DOM & 31/10 & 69/67 & 0.00661204 & 3.01014 & 3 \\ 
+  13 & rs41286971:41026812:G:A & A & G & DOM & 30/11 & 74/62 & 0.04572730 & 2.28501 & 3 \\ 
+  17 & rs8065393:12974799:T:C & C & T & DOM & 32/9 & 65/71 & 0.00063784 & 3.88376 & 3 \\ 
+  11 & rs61400460:8176765:TA:T & T & TA & DOM & 18/23 & 11/125 & 0.00000071 & 8.89328 & 2 \\ 
+  21 & rs2242720 & G & A & DOM & 30/11 & 59/77 & 0.00118010 & 3.55932 & 2 \\ 
+  11 & rs9943610:86367530:C:T & C & T & DOM & 24/17 & 47/89 & 0.01033820 & 2.67334 & 1 \\ 
+  13 & rs1464811:108513537:A:G & G & A & DOM & 25/16 & 50/86 & 0.00706479 & 2.68750 & 1 \\ 
+   \hline
+\end{tabular}
+}
+\caption{Variants statistically significant in any combination} 
+\end{table}
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Summary}
+
+SNP interactions may explain a part of the missing heritability but is a
+computationally and statistically challenging problem
+
+Significant pattern mining can help finding statistically significative
+combinations of SNPs
+
+Teh methodology is valid for other types of biomedical data
 
 \end{frame}
 

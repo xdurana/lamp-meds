@@ -1,5 +1,5 @@
 ---
-title: Statistically significant SNP combinations for GWAS data
+title: Significant pattern mining for GWAS data
 subtitle:
 author: |
   | Xavier Duran
@@ -15,6 +15,8 @@ output:
     incremental: no
     keep_tex: yes
     fig_caption: false
+    fig_width: 6
+    fig_height: 4
     dev: png
     slide_level: 2
     toc: no
@@ -22,43 +24,30 @@ output:
 
 ## Missing heritability problem on GWAS
 
-GWAS studies have discovered many loci associated with various complex traits but they only explain a very small part of the human heritability
-
-Screening of individual SNPs using statistical tests to assess the association of each SNP with a phenotype
-
-
-## Statistical epistatic interactions are hard to find
-
-This unexplained variation because GWAS tries to solve common variant, common disease hypothesis
-
-Most complex traits are due to the effect of interactions of different SNP
-
-Combinatorial effects of multiple SNPs
-
-Epistasis can be part of the explanation
-
-
-## Why?
-
-Apply data mining and machine learning techniques to biological data analysis
-
-Hard computational problem
-
-GCAT
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+df <- data.frame(c(100, 80, 45, 16),
+  c('Variance', 'Heritability', 'SNP-heritability', 'GWAS'))
+colnames(df) <- c('percent', 'variability')
+barplot(df$percent, col = rainbow(10), ylim=c(0,100), names.arg=df$variability, main = "Height variance")
+```
 
 
 ## Limitless arity multi-testing procedure (LAMP)
 
-Computational complexity
+Significant pattern mining techniques can help to find high-order interactions on GWAS data (and other biological data)
 
-Statistical significance
+\pause
 
-
-## Outline
+### Outline
 
 The complexity of combinatorial variant discovery
 
+\pause
+
 How does LAMP approaches a solution
+
+\pause
 
 Results on a lung cancer dataset
 
@@ -68,33 +57,87 @@ Results on a lung cancer dataset
 
 Exploring all combinations is computationally prohibitive
 
-Exponential growth: for $M$ binary variables, $2^M$ tests computed
+\pause
 
+$M^2$ second order possible interactions
 
-## Finding combinations of features
+\pause
+
+$2^M$ limitless order interactions
+
+\pause
+
 ### Statistical problem
 
 Discovered combinations are statistically unlikely due to multiple testing correction
+
+\pause
 
 For $M$ binary variables, Bonferroni correction sets significance below $\frac{\alpha}{2^M}$
 
 
 ## Finding combinations of features
-### We cannot test all combinations
+### Machine learning approaches
 
-Most machine learning methods (RF) don't evaluate statistical significance of the reported results
+Random Forests, Suport Vector Machines, Multifactor Dimensionality Reduction
 
-Too much false positives, very costly to futher explore hypothesis
+\pause
 
-Not comprehensive
+Variable rankings
 
+\pause
+
+Too much false positives
+
+\pause
+
+Very costly to futher explore hypothesis
+
+
+## Limitless arity multi-testing procedure (LAMP)
+### Fisher's exact test
+
+Not all combinations are frequent enough to become significant in any case/control setting
+
+\pause
+
+Each combination has a maximum p-value, independent of its distribution on the two classes
+
+\pause
+
+||Case|Control|Total|
+|--------------|-------:|---:|---:|
+|Has $S_i$|||13|
+|Hasn't $S_i$|||357|
+|total|184|186|370|
+
+
+## Limitless arity multi-testing procedure (LAMP)
+### Fisher's exact test
+
+Not all combinations are frequent enough to become significant in any case/control setting
+
+Each combination has a maximum p-value, independent of its distribution on the two classes
+
+||Case|Control|Total|
+|--------------|-------:|---:|---:|
+|Has $S_i$|13|0|13|
+|Hasn't $S_i$|171|186|357|
+|total|184|186|370|
+
+\pause
+
+raw p-value = $9.1*10^{-5}$
+
+\pause
+
+FWER threshold $\delta=\alpha/1000$ = 0.05/1000 = $5*10^{-5}$
 
 ## Limitless arity multi-testing procedure (LAMP)
 
 Multiple testing procedure for listing ALL statistically significant high order interactions
 
-## Limitless arity multi-testing procedure (LAMP)
-### Testable combinations
+\pause
 
 Upper bound of Family Wise Error Ratio (FWER)
 
@@ -102,19 +145,76 @@ Upper bound of Family Wise Error Ratio (FWER)
 
 [Terada et al. 2013]
 
-## Limitless arity multi-testing procedure (LAMP)
-### Fisher's exact test
+## LAMPLINK
 
-Not all combinations are frequent enough to become frequent in any case/control setting
+LAMPLINK is implemented as additional features to PLINK
 
-Each combination has a maximum p-value, independent of its distribution on the two classes
+\pause
 
-Test only what is relevant to test
+Model dominant/recessive for the risk class for the minor allele
+
+\pause
+
+- Find all significant combinations
+- Remove combinations with SNPs in linkage desequilibrium
+
+## LAMPLINK
+### LAMP in a lung cancer dataset
+
+GWAS data of lung cancer progression
+
+|||
+|--|--|
+|GWAS threshold | p-value < $10^{-4}$ |
+|SNPs | 695 |
+|Individuals | 178 |
+|Statistical test | Fisher's exact test |
+|Adjusted significance level | $5.8*10^{-9}$ |
+|Correction factor | 8619336 |
+|Significant combinations | 5019 |
+|$r^2$ for LD| 0.2 |
+|Significant combinations after LD pruning | 145 |
+|Significant SNPs | 25 |
+|Maximum arity | 7 |
+
+## LAMPLINK
+### LAMP in a lung cancer dataset
 
 
-||Case|Control|Total|
-|--------------|-------|---|---|
-|Has $S_i$|171|206|377|
-|Hasn't $S_i$|11|14|27|
-|total|182|300|404|
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
+library(xtable)
+library(dplyr)
+library(data.table)
+library(stringr)
+
+options(xtable.comment = FALSE)
+a <- fread('/imppc/labs/dnalab/xduran/fim/output/lung/assoc_10_4_0.4/assoc.ld.lamp') %>%
+  transform(arity=str_count(COMB, ",")+1) %>%
+  filter(row_number() %in% 1:20) %>%
+  xtable(auto = TRUE, caption="Statistically significant variant combinations", tabular.environment="longtable") %>%
+  print(scalebox = 0.3, include.rownames=FALSE)
+```
+
+## LAMPLINK
+### LAMP in a lung cancer dataset
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+library(xtable)
+library(dplyr)
+
+options(xtable.comment = FALSE)
+read.csv2('/imppc/labs/dnalab/xduran/fim/output/lung/assoc_10_4_0.4/assoc.ld.lamp.comb.csv') %>%
+  arrange(desc(COMB)) %>%
+  xtable(auto = TRUE, caption="Variants statistically significant in any combination", tabular.environment="longtable") %>%
+  print(scalebox = 0.5, include.rownames=FALSE)
+```
+
+## Summary
+
+SNP interactions may explain a part of the missing heritability but is a computationally and statistically challenging problem
+
+Significant pattern mining can help finding statistically significative combinations of SNPs
+
+The methodology is valid for other types of biomedical data
